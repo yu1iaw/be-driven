@@ -1,5 +1,6 @@
+import { Driver } from '@prisma/client/react-native';
 import * as Location from 'expo-location';
-import { Driver, MarkerData, TCoords } from "./types";
+import { MarkerData, TCoords } from "./types";
 
 const directionsAPI = process.env.EXPO_PUBLIC_GOOGLE_API_KEY;
 
@@ -19,7 +20,7 @@ export const generateMarkersFromData = ({
         return {
             latitude: userLatitude + latOffset,
             longitude: userLongitude + lngOffset,
-            title: `${driver.first_name} ${driver.last_name}`,
+            title: `${driver.firstName} ${driver.lastName}`,
             ...driver,
         };
     });

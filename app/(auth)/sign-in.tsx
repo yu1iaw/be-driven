@@ -1,12 +1,12 @@
 import { CustomButton } from "@/components/custom-button";
 import { FormField } from "@/components/form-field";
 import { icons, images } from "@/constants";
-import { fetchAPI } from "@/lib/fetch";
+import { checkExistingUser } from "@/lib/prisma";
 import tw from "@/lib/tailwind";
 import { useUserStore } from "@/store/user-store";
 import { Link } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Image, Text, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, Text, View } from "react-native";
 
 
 
@@ -16,7 +16,7 @@ export default function SignIn() {
     const [error, setError] = useState<string | null>(null);
     const setUsername = useUserStore(store => store.setUsername);
     const setUserId = useUserStore(store => store.setUserId);
-
+    const setHashedPassword = useUserStore(store => store.setHashedPassword);
 
 
     const handleSignInPress = async () => {
@@ -26,14 +26,15 @@ export default function SignIn() {
         try {
             if (!name) return setError('Empty value');
 
-            const existingUser = await fetchAPI(`/username/${name}`);
+            const existingUser= await checkExistingUser(name);
 
-            if (!existingUser.length) {
+            if (!existingUser) {
                 return setError('User does not exist');
             } else {
-                const { id, name } = existingUser[0];
+                const { id, username, hashedPassword } = existingUser;
                 setUserId(id);
-                setUsername(name);
+                setUsername(username);
+                setHashedPassword(hashedPassword);
             }
         } catch (error) {
             console.log(error);
@@ -43,7 +44,10 @@ export default function SignIn() {
     }
 
     return (
-        <View style={tw`bg-white flex-1`}>
+        <ScrollView
+            style={tw`bg-white`}
+            showsVerticalScrollIndicator={false}
+        >
             <View style={tw`relative`}>
                 <Image
                     source={images.signUpCar}
@@ -85,6 +89,6 @@ export default function SignIn() {
                     <Link style={tw`text-primary-500 font-JakartaSemiBold`} href='/(auth)/register'>Register</Link>
                 </Text>
             </View>
-        </View>
+        </ScrollView>
     )
 }

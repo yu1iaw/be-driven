@@ -1,6 +1,6 @@
 import { icons } from '@/constants';
 import tw from '@/lib/tailwind';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
 import { useMemo, useRef } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
@@ -14,9 +14,11 @@ type RideLayoutProps = {
     title?: string;
 }
 
-export const RideLayout = ({ title, children }: RideLayoutProps) => {    
+export const RideLayout = ({ title, children }: RideLayoutProps) => {
     const bottomSheetRef = useRef<BottomSheet>(null);
     const snapPoints = useMemo(() => ["5%", "50%", "85%"], []);
+    const BottomContainer = title === "Ride" ? BottomSheetView : BottomSheetScrollView;
+
 
     return (
         <GestureHandlerRootView>
@@ -43,11 +45,13 @@ export const RideLayout = ({ title, children }: RideLayoutProps) => {
                     index={1}
                     handleIndicatorStyle={tw`bg-[#333]`}
                 >
-                    <BottomSheetView
-                        style={tw`flex-1 p-5`}
+                    <BottomContainer
+                        showsVerticalScrollIndicator={false}
+                        style={tw.style(title === "Ride" && 'p-5 pb-8')}
+                        contentContainerStyle={tw`p-5 pb-8`}
                     >
                         {children}
-                    </BottomSheetView>
+                    </BottomContainer>
                 </BottomSheet>
             </View>
         </GestureHandlerRootView>

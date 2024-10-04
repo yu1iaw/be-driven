@@ -3,20 +3,21 @@ import tw from '@/lib/tailwind';
 import { useLocationStore } from '@/store/location-store';
 import { useUserStore } from '@/store/user-store';
 import { router } from 'expo-router';
+import { memo } from 'react';
 import { Text, View } from 'react-native';
 import { GoogleTextInput } from './google-text-input';
 import { Map } from './map';
 
 
 
-export const HeaderList = () => {
+export const HeaderList = memo(() => {
     const username = useUserStore(store => store.username);
     const setDestinationLocation = useLocationStore(store => store.setDestinationLocation);
-
+    
 
     const handleDestinationPress = (location: { latitude: number, longitude: number, address: string }) => {
         setDestinationLocation(location);
-        router.push('/(root)/find-ride');
+        router.navigate('/(root)/find-ride');
     }
 
     return (
@@ -37,4 +38,4 @@ export const HeaderList = () => {
 
         </>
     )
-}
+})

@@ -1,7 +1,7 @@
 import { CustomButton } from "@/components/custom-button";
 import { FormField } from "@/components/form-field";
 import { icons, images } from "@/constants";
-import { fetchAPI } from "@/lib/fetch";
+import { checkExistingUser, registerUser } from "@/lib/prisma";
 import tw from "@/lib/tailwind";
 import { hashPassword } from "@/lib/utils";
 import { useUserStore } from "@/store/user-store";
@@ -20,6 +20,7 @@ export default function Register() {
     const setUserId = useUserStore(store => store.setUserId);
     const setUsername = useUserStore(store => store.setUsername);
     const setHashedPassword = useUserStore(store => store.setHashedPassword);
+    const setCreatedAt = useUserStore(store => store.setCreatedAt);
 
 
     const handleRegisterPress = async () => {
@@ -31,26 +32,21 @@ export default function Register() {
             if (password.length < 6) return setError('Too short. At least 6 characters long');
             if (password !== confirmPassword) return setError('Make sure your passwords are identical');
             
-            const existingUser = await fetchAPI(`/username/${name}`);
-            if (existingUser.length) {
+            const existingUser = await checkExistingUser(name);
+            if (existingUser) {
                 return setError('Username already exists');
             }
 
-            const { id } = await fetchAPI('/user/create', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ name })
+            const hashedPassword = await hashPassword(password);
+            const newUser = await registerUser({
+                username: name,
+                hashedPassword
             })
-
-            if (id) {
-                const hashedPassword = await hashPassword(password);
-
-                setUserId(id);
-                setUsername(name);
-                setHashedPassword(hashedPassword);
-            }
+        
+            setUserId(newUser.id);
+            setUsername(newUser.username);
+            setHashedPassword(newUser.hashedPassword);
+            setCreatedAt(newUser.createdAt);
         } catch (error) {
             console.log(error);
         } finally {
@@ -61,6 +57,7 @@ export default function Register() {
     return (
         <ScrollView
             style={tw`bg-white`}
+            showsVerticalScrollIndicator={false}
         >
             <View style={tw`relative`}>
                 <Image
@@ -88,7 +85,7 @@ export default function Register() {
                         value={password}
                         onChangeText={setPassword}
                         autoCapitalize="none"
-                        secureTextEntry
+                        password
                     />
                     {error && error.startsWith('Too') && <Text style={tw`text-danger-600 absolute -bottom-3 left-3`}>{error}</Text>}
                 </View>
@@ -99,7 +96,7 @@ export default function Register() {
                         value={confirmPassword}
                         onChangeText={setConfirmPassword}
                         autoCapitalize="none"
-                        secureTextEntry
+                        password
                     />
                     {error && error.startsWith('Make') && <Text style={tw`text-danger-600 absolute -bottom-3 left-3`}>{error}</Text>}
                 </View>

@@ -35,7 +35,7 @@ export default function BookRide() {
 
                 <View style={tw`flex-center mt-5`}>
                     <Image
-                        source={{ uri: driverDetails?.profile_image_url }}
+                        source={{ uri: driverDetails?.profileImageUrl }}
                         style={tw`w-22 h-22 rounded-full`}
                     />
 
@@ -51,7 +51,7 @@ export default function BookRide() {
                                 resizeMode="contain"
                             />
                             <Text style={tw`text-lg font-Jakarta`}>
-                                {driverDetails?.rating}
+                                {Number(driverDetails?.rating)}
                             </Text>
                         </View>
                     </View>
@@ -76,7 +76,7 @@ export default function BookRide() {
                     <View style={tw`flex flex-row items-center justify-between w-full py-2`}>
                         <Text style={tw`text-base text-primary-500 font-JakartaMedium`}>Car Seats</Text>
                         <Text style={tw`text-base font-Jakarta`}>
-                            {driverDetails?.car_seats}
+                            {driverDetails?.carSeats}
                         </Text>
                     </View>
                 </View>

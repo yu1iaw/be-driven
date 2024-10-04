@@ -13,7 +13,7 @@ export const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => 
             style={tw.style(`bg-white flex-row items-center justify-between py-5 px-2 rounded-xl`, selected === item.id && "bg-general-600")}
         >
             <Image
-                source={{ uri: item.profile_image_url }}
+                source={{ uri: item.profileImageUrl }}
                 style={tw`w-14 h-14 rounded-full`}
             />
 
@@ -23,7 +23,7 @@ export const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => 
 
                     <View style={tw`flex-row items-center gap-x-1 ml-2`}>
                         <Image source={icons.star} style={tw`w-3.5 h-3.5`} />
-                        <Text style={tw`text-sm font-Jakarta`}>{item.rating}</Text>
+                        <Text style={tw`text-sm font-Jakarta`}>{+item.rating}</Text>
                     </View>
                 </View>
 
@@ -48,13 +48,13 @@ export const DriverCard = ({ item, selected, setSelected }: DriverCardProps) => 
                     </Text>
 
                     <Text style={tw`text-sm font-Jakarta text-general-800`}>
-                        {item.car_seats} seats
+                        {item.carSeats} seats
                     </Text>
                 </View>
             </View>
 
             <Image
-                source={{ uri: item.car_image_url }}
+                source={{ uri: item.carImageUrl }}
                 style={tw`h-13 w-13`}
                 resizeMode="contain"
             />

@@ -1,10 +1,12 @@
 import { images } from '@/constants';
 import { fetchAPI } from '@/lib/fetch';
+import { createRide, createTicket } from '@/lib/prisma';
 import tw from '@/lib/tailwind';
 import { PaymentProps } from '@/lib/types';
 import { useDriverStore } from '@/store/driver-store';
 import { setLight } from '@/store/light-store';
 import { useLocationStore } from '@/store/location-store';
+import { Decimal } from '@prisma/client/runtime/react-native';
 import { useStripe } from '@stripe/stripe-react-native';
 import { Result } from '@stripe/stripe-react-native/lib/typescript/src/types/PaymentMethod';
 import { IntentCreationCallbackParams } from '@stripe/stripe-react-native/lib/typescript/src/types/PaymentSheet';
@@ -15,6 +17,9 @@ import Modal from "react-native-modal";
 import { CustomButton } from './custom-button';
 
 
+const API_URL = __DEV__
+    ? 'http://192.168.1.105:8080'
+    : 'https://stripe-server-tv87.onrender.com';
 
 export const Payment = ({ userId, fullName, amount, driverId, rideTime }: PaymentProps) => {
     const [success, setSuccess] = useState(false);
@@ -27,7 +32,7 @@ export const Payment = ({ userId, fullName, amount, driverId, rideTime }: Paymen
     const destinationLongitude = useLocationStore(store => store.destinationLongitude);
     const clearSelectedDriver = useDriverStore(store => store.clearSelectedDriver);
 
-    
+
     const openPaymentSheet = async () => {
         await initializePaymentSheet();
         const { error } = await presentPaymentSheet();
@@ -57,7 +62,7 @@ export const Payment = ({ userId, fullName, amount, driverId, rideTime }: Paymen
 
     const confirmHandler = async (paymentMethod: Result, shouldSavePaymentMethod: boolean, intentCreationCallback: (result: IntentCreationCallbackParams) => void) => {
         try {
-            const { paymentIntent, customer } = await fetchAPI('/create', {
+            const { paymentIntent, customer } = await fetchAPI(`https://stripe-server-tv87.onrender.com/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -69,9 +74,9 @@ export const Payment = ({ userId, fullName, amount, driverId, rideTime }: Paymen
                     paymentMethodId: paymentMethod.id
                 })
             });
-    
+
             if (paymentIntent.client_secret) {
-                const { result } = await fetchAPI('/pay', {
+                const { result } = await fetchAPI(`https://stripe-server-tv87.onrender.com/pay`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -82,45 +87,32 @@ export const Payment = ({ userId, fullName, amount, driverId, rideTime }: Paymen
                         customer_id: customer
                     })
                 })
-    
+                
                 if (result.client_secret) {
-                    const { data } = await fetchAPI('/ride/create', {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            origin_address: userAddress,
-                            destination_address: destinationAddress,
-                            origin_latitude: userLatitude,
-                            origin_longitude: userLongitude,
-                            destination_latitude: destinationLatitude,
-                            destination_longitude: destinationLongitude,
-                            ride_time: Math.round(rideTime ?? 0),
-                            fare_price: +(amount ?? '0'),
-                            payment_status: "paid",
-                            driver_id: driverId,
-                            user_id: userId,
-                        })
+                    const newRideId = await createRide({
+                        originAddress: `${userAddress}`,
+                        destinationAddress: `${destinationAddress}`,
+                        originLatitude: userLatitude as any as Decimal,
+                        originLongitude: userLongitude as any as Decimal,
+                        destinationLatitude: destinationLatitude as any as Decimal,
+                        destinationLongitude: destinationLongitude as any as Decimal,
+                        rideTime: Math.round(rideTime ?? 0),
+                        farePrice: amount as any as Decimal,
+                        paymentStatus: "paid",
+                        driverId: Number(driverId),
+                        userId: userId,
                     })
-                    
+
                     intentCreationCallback({ clientSecret: result.client_secret })
-    
-                    if (data.ride_id) {
-                        await fetchAPI('/ticket/create', {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                ride_id: data.ride_id,
-                                qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Order%E2%80%A2${data.ride_id}`
-                            })
+
+                    if (newRideId) {
+                        await createTicket({
+                            rideId: newRideId,
+                            qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Order%E2%80%A2${newRideId}`
                         })
                     }
                 }
             }
-            
         } catch (error) {
             console.log(error);
         }
@@ -130,7 +122,7 @@ export const Payment = ({ userId, fullName, amount, driverId, rideTime }: Paymen
         setSuccess(false);
         clearSelectedDriver();
         setLight('on');
-        router.push('/(root)/(tabs)/home');
+        router.navigate('/(root)/(tabs)/home');
     }
 
 
@@ -141,7 +133,7 @@ export const Payment = ({ userId, fullName, amount, driverId, rideTime }: Paymen
                 className='my-10'
                 onPress={openPaymentSheet}
             />
-            <Modal isVisible={success} onBackdropPress={() => setSuccess(false)}>
+            <Modal isVisible={success}>
                 <View style={tw`bg-white flex-center p-7 rounded-2xl`}>
                     <Image
                         source={images.check}
