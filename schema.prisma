@@ -1,0 +1,61 @@
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["reactNative"]
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = "file:./app.db"
+}
+
+model User {
+    id             Int      @id @default(autoincrement())
+    username       String   @unique
+    picture        String   @default("https://cdn2.iconfinder.com/data/icons/pictograms-vol-1/400/human-512.png")
+    hashedPassword String
+    rides          Ride[]
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @default(now())
+}
+
+model Driver {
+    id              Int      @id @default(autoincrement())
+    firstName       String
+    lastName        String
+    profileImageUrl String
+    phone           String
+    carImageUrl     String
+    carSeats        Int
+    rating          Decimal
+    rides           Ride[]
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @default(now())
+}
+
+model Ride {
+    id                   Int      @id @default(autoincrement())
+    originAddress        String
+    destinationAddress   String
+    originLatitude       Decimal
+    originLongitude      Decimal
+    destinationLatitude  Decimal
+    destinationLongitude Decimal
+    rideTime             Int
+    farePrice            Decimal
+    paymentStatus        String
+    user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    userId               Int
+    driver               Driver   @relation(fields: [driverId], references: [id], onDelete: Cascade)
+    driverId             Int
+    ticket               Ticket?
+    createdAt            DateTime @default(now())
+    updatedAt            DateTime @default(now())
+}
+
+model Ticket {
+    id        Int      @id @default(autoincrement())
+    qrCodeUrl String
+    ride      Ride     @relation(fields: [rideId], references: [id], onDelete: Cascade)
+    rideId    Int      @unique
+    createdAt DateTime @default(now())
+}

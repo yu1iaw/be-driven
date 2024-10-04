@@ -12,6 +12,7 @@ export const GoogleTextInput = ({icon, initialLocation, containerStyle, textInpu
             <GooglePlacesAutocomplete
                 placeholder="Where do you want to go?"
                 debounce={400}
+                minLength={2}
                 fetchDetails
                 enablePoweredByContainer={false}
                 query={{

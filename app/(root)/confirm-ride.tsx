@@ -17,7 +17,7 @@ export default function ConfirmRide() {
             <FlatList
                 data={drivers}
                 keyExtractor={item => item.id.toString()}
-                showsVerticalScrollIndicator={false}
+                scrollEnabled={false}
                 renderItem={({ item }) => (
                     <DriverCard item={item} selected={selectedDriver!} setSelected={() => setSelectedDriver(item.id)} />
                 )}
@@ -26,9 +26,9 @@ export default function ConfirmRide() {
                         title="Select Ride"
                         onPress={() => {
                             if (!selectedDriver) return;
-                            router.push('/(root)/book-ride');
+                            router.navigate('/(root)/book-ride');
                         }}
-                        className="mt-10"
+                        className="my-10"
                     />
                 )}
             />

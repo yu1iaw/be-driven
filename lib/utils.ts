@@ -34,7 +34,7 @@ export const getTextVariantStyle = (variant: ButtonProps["textVariant"]) => {
     }
 }
 
-export const formatDate = (param: string) => {
+export const formatDate = (param: Date) => {
     return new Date(param).toLocaleDateString("default", {
         // dateStyle: "medium",
         day: "numeric",

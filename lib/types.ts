@@ -1,3 +1,4 @@
+import { Decimal } from "@prisma/client/runtime/react-native";
 import { TextInputProps, TouchableOpacityProps } from "react-native";
 
 
@@ -20,10 +21,14 @@ export type TUserStore = {
     userId: number | null;
     username: string | null;
     hashedPassword: string | null;
+    picture: string | null,
+    createdAt: Date | null,
     initialCoords: TCoords | null;
     setUserId: (userId: number) => void;
     setUsername: (username: string) => void;
     setHashedPassword: (hashedPassword: string) => void;
+    setPicture: (url: string) => void;
+    setCreatedAt: (date: Date) => void;
     setInitialCoords: ({ latitude, longitude }: TCoords) => void;
     logout: () => void;
     deleteAccount: () => void;
@@ -57,12 +62,12 @@ export type MarkerData = {
     longitude: number;
     id: number;
     title: string;
-    profile_image_url: string;
-    car_image_url: string;
-    car_seats: number;
-    rating: string;
-    first_name: string;
-    last_name: string;
+    profileImageUrl: string;
+    carImageUrl: string;
+    carSeats: number;
+    rating: Decimal;
+    firstName: string;
+    lastName: string;
     time?: number;
     price?: string;
 }
@@ -106,6 +111,7 @@ export type GoogleInputProps = {
     initialLocation?: string | null;
     containerStyle?: string;
     textInputBackgroundColor?: string;
+    disableScroll?: boolean;
     handlePress: ({
         latitude,
         longitude,
@@ -120,6 +126,7 @@ export type GoogleInputProps = {
 export type InputFieldProps = TextInputProps & {
     label: string;
     icon?: any;
+    password?: boolean;
     secureTextEntry?: boolean;
     labelStyle?: string;
     containerStyle?: string;
